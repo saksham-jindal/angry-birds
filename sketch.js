@@ -4,12 +4,16 @@ const Bodies = Matter.Bodies;
 const Constraint = Matter.Constraint;
 
 var engine, world;
-var box1, pig1;
+var box1, pig1,pig3;
 var backgroundImg,platform;
-var bird, slingShot;
+var bird, slingshot;
+
+var gameState = "onSling";
+var bg = "sprites/bg1.png";
+var score = 0;
 
 function preload() {
-    backgroundImg = loadImage("sprites/bg.png");
+    getBackgroundImg();
 }
 
 function setup(){
@@ -43,18 +47,27 @@ function setup(){
 }
 
 function draw(){
-    background(backgroundImg);
+    if(backgroundImg)
+        background(backgroundImg);
+    
+        noStroke();
+        textSize(35)
+        fill("white")
+        text("Score  " + score, width-300, 50)
+    
     Engine.update(engine);
-    strokeWeight(4);
+    //strokeWeight(4);
     box1.display();
     box2.display();
     ground.display();
     pig1.display();
+    pig1.score();
     log1.display();
 
     box3.display();
     box4.display();
     pig3.display();
+    pig3.score();
     log3.display();
 
     box5.display();
@@ -68,10 +81,39 @@ function draw(){
 }
 
 function mouseDragged(){
-    Matter.Body.setPosition(bird.body, {x: mouseX , y: mouseY});
+    //if (gameState!=="launched"){
+        Matter.Body.setPosition(bird.body, {x: mouseX , y: mouseY});
+    //}
 }
 
 
 function mouseReleased(){
     slingshot.fly();
+    gameState = "launched";
+}
+
+function keyPressed(){
+    if(keyCode === 32){
+        bird.trajectory = [];
+        Matter.Body.setPosition(bird.body, {x: 200 , y: 50});
+       slingshot.attach(bird.body);
+    }
+}
+
+async function getBackgroundImg(){
+    var response = await fetch("http://worldtimeapi.org/api/timezone/Asia/Kolkata");
+    var responseJSON = await response.json();
+
+    var datetime = responseJSON.datetime;
+    var hour = datetime.slice(11,13);
+    
+    if(hour>=0600 && hour<=1900){
+        bg = "sprites/bg1.png";
+    }
+    else{
+        bg = "sprites/bg2.jpg";
+    }
+
+    backgroundImg = loadImage(bg);
+    console.log(backgroundImg);
 }
